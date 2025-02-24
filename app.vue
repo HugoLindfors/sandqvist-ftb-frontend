@@ -1,11 +1,13 @@
 <template>
   <div>
     <h1>Swedish Royal Family</h1>
-    <ul v-if="royalFamily.length > 0">
-      <li v-for="member in royalFamily[0]" :key="member.id">
+    <ul v-if="swedishRoyalFamily.length > 0">
+      <li v-for="member in swedishRoyalFamily" :key="member.id">
         <div class="member-info">
           <p><strong>Name:</strong> {{ member.firstName || 'N/A' }} {{ member.familyName || 'N/A' }}</p>
           <p><strong>Gender:</strong> {{ getGender(member.gender) }}</p>
+          <p><strong>Birth Date:</strong> {{ member.birthDate }}</p>
+          <p v-if="member.deathDate"><strong>Death Date:</strong> {{ member.deathDate }}</p>
         </div>
       </li>
     </ul>
@@ -19,15 +21,15 @@
 import { ref, onMounted } from 'vue';
 
 interface FamilyMember {
-  id: string;
+  id: number;
   familyName: string;
   firstName: string;
-  gender: number; // Assuming your Gender enum is represented as numbers (0=Male, 1=Female, etc.)
-  birthDate: string | null; // ISO 8601 date string
+  gender: number;
+  birthDate: string | null;
   deathDate: string | null;
 }
 
-const royalFamily = ref<FamilyMember[]>([]);
+const swedishRoyalFamily = ref<FamilyMember[]>([]);
 const loading = ref(true);
 const error = ref(false);
 
@@ -38,7 +40,6 @@ async function fetchSwedishRoyalFamily(): Promise<FamilyMember[]> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data: FamilyMember[] = await response.json();
-    // console.log(data);
     return data;
   } catch (err) {
     error.value = true;
@@ -50,10 +51,11 @@ async function fetchSwedishRoyalFamily(): Promise<FamilyMember[]> {
 }
 
 onMounted(async () => {
-  royalFamily.value = await fetchSwedishRoyalFamily();
-  console.log("VALUE:", royalFamily.value);
-  console.log("RAW:", royalFamily);
-  console.log(royalFamily.value.length);
+  swedishRoyalFamily.value = await fetchSwedishRoyalFamily();
+  console.log('VALUE:', swedishRoyalFamily.value);
+  console.log('RAW:', swedishRoyalFamily);
+  console.log(swedishRoyalFamily.value.length);
+  let familyMembers = swedishRoyalFamily.value.$values;
 });
 
 function getGender(gender: number): string {
@@ -70,12 +72,25 @@ function getGender(gender: number): string {
       return 'Unknown';
   }
 }
-
 </script>
 
 <style>
 body {
   color: white;
   background-color: black;
+}
+
+ul {
+  list-style-type: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+li {
+  border: 1px solid white;
+  border-radius: 15px;
+  width: 20vw;
+  margin: 10px;
+  padding: 10px;
 }
 </style>
